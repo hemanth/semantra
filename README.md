@@ -1,6 +1,10 @@
 # semantra
 
+[![npm](https://img.shields.io/npm/v/semantra)](https://www.npmjs.com/package/semantra)
+
 **Semantic vector search, entirely in the browser.**
+
+[**Live Demo →**](https://hemanth.github.io/semantra/)
 
 One function. One await. No backend, no API keys, no GPU.
 
