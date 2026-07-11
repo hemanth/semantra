@@ -279,6 +279,26 @@
     }
 
     .footer-links a:hover { color: var(--text-dim); }
+
+    .arch-section {
+      margin-top: 48px;
+      margin-bottom: 0;
+    }
+
+    .arch-label {
+      font-size: 0.78rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-faint);
+      margin-bottom: 16px;
+      text-transform: lowercase;
+    }
+
+    .arch-img {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      filter: invert(1);
+    }
   </style>
 </head>
 <body>
@@ -310,6 +330,11 @@
     </div>
 
     <div id="results"></div>
+
+    <div class="arch-section">
+      <div class="arch-label">Architecture</div>
+      <img src="./architecture.jpg" alt="semantra architecture diagram" class="arch-img">
+    </div>
 
     <div class="footer">
       <div class="install-cmd" onclick="copyInstall(this)">
