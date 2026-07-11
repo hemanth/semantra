@@ -5,166 +5,137 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>semantra — Semantic Search Demo</title>
   <meta name="description" content="Semantic vector search entirely in the browser. No backend, no API keys. Try it live.">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0a0a0f;
-      --surface: rgba(255, 255, 255, 0.04);
-      --surface-hover: rgba(255, 255, 255, 0.08);
-      --border: rgba(255, 255, 255, 0.08);
-      --text: #e8e8ed;
-      --text-dim: #8888a0;
-      --accent: #6366f1;
-      --accent-glow: rgba(99, 102, 241, 0.25);
-      --green: #22c55e;
-      --radius: 16px;
+      --bg: #000;
+      --surface: #111;
+      --border: #222;
+      --border-hover: #333;
+      --text: #eee;
+      --text-dim: #777;
+      --text-faint: #444;
+      --white: #fff;
+      --radius: 12px;
     }
 
     body {
-      font-family: 'Inter', system-ui, sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 60px 20px;
-      overflow-x: hidden;
+      padding: 80px 20px 60px;
+      -webkit-font-smoothing: antialiased;
     }
 
-    body::before {
-      content: '';
-      position: fixed;
-      top: -40%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 800px;
-      height: 800px;
-      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-    }
+    .container { width: 100%; max-width: 680px; }
 
-    .container {
-      width: 100%;
-      max-width: 640px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 48px;
-    }
+    /* ─── Header ─── */
+    .header { margin-bottom: 48px; }
 
     .logo {
-      font-size: 2.4rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #818cf8, #6366f1, #4f46e5);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: -0.03em;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--white);
+      letter-spacing: -0.04em;
     }
 
     .tagline {
       color: var(--text-dim);
-      font-size: 0.95rem;
-      margin-top: 8px;
+      font-size: 0.88rem;
+      margin-top: 6px;
+      line-height: 1.5;
     }
 
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+    .meta-row {
+      display: flex;
+      gap: 16px;
       margin-top: 16px;
-      padding: 6px 14px;
-      font-size: 0.78rem;
-      font-weight: 500;
-      color: #a5b4fc;
-      background: rgba(99, 102, 241, 0.12);
-      border: 1px solid rgba(99, 102, 241, 0.2);
-      border-radius: 100px;
-      text-decoration: none;
-      transition: background 0.2s;
     }
 
-    .badge:hover { background: rgba(99, 102, 241, 0.2); }
+    .meta-link {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1px;
+      transition: color 0.15s, border-color 0.15s;
+    }
 
+    .meta-link:hover { color: var(--text); border-color: var(--text-dim); }
+
+    /* ─── Search ─── */
     .search-wrapper {
       position: relative;
-      margin-bottom: 32px;
+      margin-bottom: 20px;
     }
 
     .search-input {
       width: 100%;
-      padding: 16px 20px 16px 48px;
-      font-size: 1rem;
+      padding: 14px 16px 14px 44px;
+      font-size: 0.95rem;
       font-family: inherit;
-      color: var(--text);
+      color: var(--white);
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      transition: border-color 0.15s;
     }
 
-    .search-input::placeholder { color: var(--text-dim); }
-
-    .search-input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
+    .search-input::placeholder { color: var(--text-faint); }
+    .search-input:focus { border-color: var(--text-dim); }
 
     .search-icon {
       position: absolute;
-      left: 16px;
+      left: 14px;
       top: 50%;
       transform: translateY(-50%);
-      width: 20px;
-      height: 20px;
-      color: var(--text-dim);
+      width: 18px;
+      height: 18px;
+      color: var(--text-faint);
     }
 
+    /* ─── Status ─── */
     .status {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 0.82rem;
-      color: var(--text-dim);
-      margin-bottom: 24px;
-      min-height: 24px;
+      font-size: 0.78rem;
+      color: var(--text-faint);
+      margin-bottom: 20px;
+      min-height: 20px;
+      font-family: 'JetBrains Mono', monospace;
     }
 
     .status-dot {
-      width: 8px;
-      height: 8px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
-      background: var(--text-dim);
+      background: var(--text-faint);
       flex-shrink: 0;
       transition: background 0.3s;
     }
 
-    .status-dot.ready { background: var(--green); }
+    .status-dot.ready { background: var(--text); }
     .status-dot.loading {
-      background: var(--accent);
-      animation: pulse 1.2s ease-in-out infinite;
+      background: var(--text-dim);
+      animation: blink 1s step-end infinite;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
+    @keyframes blink {
+      50% { opacity: 0; }
     }
 
     .progress-bar {
-      height: 3px;
+      height: 1px;
       background: var(--border);
-      border-radius: 2px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       overflow: hidden;
       display: none;
     }
@@ -173,138 +144,152 @@
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--accent), #818cf8);
-      border-radius: 2px;
+      background: var(--text-dim);
       transition: width 0.3s ease;
       width: 0%;
     }
 
+    /* ─── Results ─── */
     .results {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .results:empty {
+      background: transparent;
+      border: none;
     }
 
     .result-card {
       padding: 16px 20px;
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      transition: background 0.2s, border-color 0.2s, transform 0.2s;
+      transition: background 0.15s;
       cursor: default;
-      animation: fadeIn 0.25s ease-out both;
+      animation: fadeIn 0.2s ease-out both;
     }
 
-    .result-card:hover {
-      background: var(--surface-hover);
-      border-color: rgba(255, 255, 255, 0.12);
-      transform: translateY(-1px);
-    }
+    .result-card:hover { background: #161616; }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     .result-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
+      gap: 12px;
+    }
+
+    .result-title {
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--white);
+      line-height: 1.4;
+      flex: 1;
     }
 
     .result-score {
-      font-size: 0.78rem;
-      font-weight: 600;
-      padding: 3px 10px;
-      border-radius: 100px;
-      background: var(--accent-glow);
-      color: #a5b4fc;
-      letter-spacing: 0.02em;
-    }
-
-    .result-index {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
       color: var(--text-dim);
+      flex-shrink: 0;
     }
 
-    .result-text {
-      font-size: 0.95rem;
-      line-height: 1.5;
-      color: var(--text);
+    .result-body {
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: var(--text-dim);
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .result-source {
+      font-size: 0.72rem;
+      color: var(--text-faint);
+      margin-top: 8px;
+      font-family: 'JetBrains Mono', monospace;
     }
 
     .empty {
       text-align: center;
-      color: var(--text-dim);
-      font-size: 0.9rem;
-      padding: 40px;
+      color: var(--text-faint);
+      font-size: 0.85rem;
+      padding: 48px 20px;
     }
 
-    .code-snippet {
+    .empty-hint {
+      font-size: 0.78rem;
+      color: var(--text-faint);
+      margin-top: 8px;
+    }
+
+    /* ─── Footer ─── */
+    .footer {
       margin-top: 48px;
-      padding: 20px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-      font-size: 0.82rem;
-      line-height: 1.6;
-      color: var(--text-dim);
-      overflow-x: auto;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
     }
-
-    .code-snippet .kw { color: #c084fc; }
-    .code-snippet .fn { color: #818cf8; }
-    .code-snippet .str { color: #34d399; }
-    .code-snippet .cm { color: #555570; }
 
     .install-cmd {
-      margin-top: 16px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 12px 16px;
+      gap: 8px;
+      padding: 10px 14px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-      font-size: 0.85rem;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
       color: var(--text);
       cursor: pointer;
-      transition: background 0.2s;
+      transition: border-color 0.15s;
+      user-select: all;
     }
 
-    .install-cmd:hover { background: var(--surface-hover); }
-    .install-cmd .dollar { color: var(--text-dim); }
-    .install-cmd .copied { color: var(--green); font-family: 'Inter', sans-serif; font-size: 0.78rem; margin-left: auto; }
-
-    .links {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      margin-top: 32px;
-    }
-
-    .links a {
-      font-size: 0.82rem;
+    .install-cmd:hover { border-color: var(--text-faint); }
+    .install-cmd .dollar { color: var(--text-faint); user-select: none; }
+    .install-cmd .copied {
       color: var(--text-dim);
-      text-decoration: none;
-      transition: color 0.2s;
+      margin-left: auto;
+      font-size: 0.72rem;
+      user-select: none;
     }
 
-    .links a:hover { color: var(--text); }
+    .footer-links {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .footer-links a {
+      font-size: 0.78rem;
+      color: var(--text-faint);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .footer-links a:hover { color: var(--text-dim); }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
       <div class="logo">semantra</div>
-      <div class="tagline">Semantic vector search, entirely in the browser</div>
-      <a class="badge" href="https://www.npmjs.com/package/semantra" target="_blank">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M1.763 0C.786 0 0 .786 0 1.763v20.474C0 23.214.786 24 1.763 24h20.474c.977 0 1.763-.786 1.763-1.763V1.763C24 .786 23.214 0 22.237 0zM5.13 5.323h13.837v13.548h-3.464V8.691h-3.464v10.18H5.13z"/></svg>
-        npm install semantra
-      </a>
+      <div class="tagline">Semantic vector search in the browser. No backend, no API keys.</div>
+      <div class="meta-row">
+        <a class="meta-link" href="https://www.npmjs.com/package/semantra">npm</a>
+        <a class="meta-link" href="https://github.com/hemanth/semantra">source</a>
+      </div>
     </div>
 
     <div class="search-wrapper">
@@ -312,7 +297,7 @@
         <circle cx="11" cy="11" r="8"/>
         <path d="m21 21-4.35-4.35"/>
       </svg>
-      <input id="search" class="search-input" type="text" placeholder="Search by meaning, not keywords..." autocomplete="off">
+      <input id="search" class="search-input" type="text" placeholder="Search 100 Wikipedia articles by meaning..." autocomplete="off" spellcheck="false">
     </div>
 
     <div id="progress" class="progress-bar">
@@ -321,62 +306,125 @@
 
     <div id="status" class="status">
       <div id="statusDot" class="status-dot"></div>
-      <span id="statusText">Initializing...</span>
+      <span id="statusText">init</span>
     </div>
 
-    <div id="results" class="results"></div>
+    <div id="results"></div>
 
-    <div class="code-snippet">
-      <span class="kw">import</span> { <span class="fn">search</span> } <span class="kw">from</span> <span class="str">'semantra'</span>;<br><br>
-      <span class="kw">const</span> results = <span class="kw">await</span> <span class="fn">search</span>(<span class="str">'forgot password'</span>, docs);<br>
-      <span class="cm">// → [{ text: 'How to reset your password', score: 0.88 }]</span>
-    </div>
-
-    <div class="install-cmd" onclick="copyInstall(this)">
-      <span class="dollar">$</span> npm install semantra
-    </div>
-
-    <div class="links">
-      <a href="https://github.com/hemanth/semantra">GitHub</a>
-      <a href="https://www.npmjs.com/package/semantra">npm</a>
+    <div class="footer">
+      <div class="install-cmd" onclick="copyInstall(this)">
+        <span class="dollar">$</span> npm install semantra
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/hemanth/semantra">GitHub</a>
+        <a href="https://www.npmjs.com/package/semantra">npm</a>
+        <a href="https://github.com/hemanth/semantra#api">Docs</a>
+      </div>
     </div>
   </div>
 
   <script type="module">
-    // In-browser semantic search using @huggingface/transformers directly
-    // (no bundler needed for the demo)
-
-    const faq = [
-      "How to reset your password",
-      "I forgot my login credentials",
-      "Track the status of your delivery",
-      "Where is my package? Shipping and tracking help",
-      "Update your billing address and payment method",
-      "How to change your credit card on file",
-      "Cancel your subscription or membership",
-      "How to get a refund for your purchase",
-      "Return policy and how to return items",
-      "Contact customer support by phone or chat",
-      "Enable two-factor authentication for security",
-      "How to delete or deactivate your account",
-      "Change your email address or username",
-      "How to upgrade to a premium plan",
-      "Download your invoice or receipt",
-      "Set up notifications and email preferences",
-      "How to use promo codes and discounts",
-      "Report a bug or technical issue",
-      "System requirements and browser compatibility",
-      "How to export or download your data",
-      "Privacy settings and data protection",
-      "How to share your account with family members",
-      "Troubleshoot login issues and locked accounts",
-      "How to connect third-party integrations",
-      "Mobile app download and installation guide",
-      "How to customize your dashboard and profile",
-      "Frequently asked questions about free trials",
-      "How to schedule a demo or consultation",
-      "Enterprise pricing and volume discounts",
-      "API documentation and developer resources",
+    // ═══════════════════════════════════════════════════════════
+    // Corpus: 100 real Wikipedia-style paragraphs across domains
+    // ═══════════════════════════════════════════════════════════
+    const corpus = [
+      { title: "General relativity", body: "General relativity is a theory of gravitation developed by Albert Einstein between 1907 and 1915. The theory states that massive objects cause a distortion in space-time, which is felt as gravity. It replaced Newton's law of universal gravitation and provides a unified description of gravity as a geometric property of space and time.", source: "Physics" },
+      { title: "CRISPR gene editing", body: "CRISPR-Cas9 is a molecular tool for editing DNA. It uses a guide RNA to direct the Cas9 enzyme to a specific location in the genome, where it makes a precise cut. This allows scientists to add, remove, or alter genetic material at particular locations in the DNA sequence with unprecedented accuracy and efficiency.", source: "Biology" },
+      { title: "Quantum computing", body: "Quantum computers use quantum bits or qubits that can exist in superposition states, representing both 0 and 1 simultaneously. This property, combined with entanglement and quantum interference, allows quantum computers to solve certain problems exponentially faster than classical computers, particularly in cryptography, optimization, and molecular simulation.", source: "Computer Science" },
+      { title: "The Great Barrier Reef", body: "The Great Barrier Reef is the world's largest coral reef system, stretching over 2,300 kilometers along the northeast coast of Australia. It comprises over 2,900 individual reef systems, 900 islands, and supports an extraordinary diversity of life including 1,500 species of fish, 400 types of coral, and numerous species of molluscs and sponges.", source: "Geography" },
+      { title: "Photosynthesis", body: "Photosynthesis is the process by which plants, algae, and cyanobacteria convert light energy into chemical energy stored in glucose. The process occurs in chloroplasts and involves two stages: the light-dependent reactions that generate ATP and NADPH, and the Calvin cycle that uses these molecules to fix carbon dioxide into organic sugars.", source: "Biology" },
+      { title: "The French Revolution", body: "The French Revolution began in 1789 with the storming of the Bastille and ended in 1799 with Napoleon's rise to power. It abolished the feudal system and the absolute monarchy, replacing them with democratic ideals of citizenship and inalienable rights. The Declaration of the Rights of Man established principles of liberty, equality, and popular sovereignty.", source: "History" },
+      { title: "Machine learning", body: "Machine learning is a subset of artificial intelligence where algorithms improve through experience without being explicitly programmed. Supervised learning uses labeled training data, unsupervised learning discovers hidden patterns, and reinforcement learning optimizes decisions through trial and error. Deep learning, using neural networks with multiple layers, has driven recent breakthroughs in image recognition, natural language processing, and game playing.", source: "Computer Science" },
+      { title: "The human immune system", body: "The human immune system is a complex network of cells, tissues, and organs that defends the body against pathogens. Innate immunity provides immediate but non-specific defense, while adaptive immunity develops targeted responses through T cells and B cells. Immunological memory enables faster responses to previously encountered pathogens, forming the basis of vaccination.", source: "Medicine" },
+      { title: "Climate change", body: "Climate change refers to long-term shifts in global temperatures and weather patterns. Since the Industrial Revolution, human activities — primarily burning fossil fuels — have increased atmospheric carbon dioxide concentrations from 280 to over 420 parts per million. This enhanced greenhouse effect has raised global average temperatures by approximately 1.1°C, causing glacial retreat, sea level rise, and more frequent extreme weather events.", source: "Earth Science" },
+      { title: "The Renaissance", body: "The Renaissance was a cultural movement that began in Florence, Italy in the 14th century and spread across Europe over the next three centuries. It marked a transition from medieval to modern times, characterized by renewed interest in classical Greek and Roman art, literature, and philosophy. Key figures include Leonardo da Vinci, Michelangelo, and Galileo Galilei.", source: "History" },
+      { title: "DNA structure", body: "Deoxyribonucleic acid (DNA) is a double helix structure discovered by Watson and Crick in 1953. It consists of two complementary strands of nucleotides connected by hydrogen bonds between base pairs: adenine with thymine, and guanine with cytosine. The sequence of these bases encodes genetic instructions for the development and functioning of all known living organisms.", source: "Biology" },
+      { title: "Black holes", body: "A black hole is a region of spacetime where gravity is so strong that nothing, not even light, can escape from it. They form when massive stars collapse at the end of their life cycle. The boundary around a black hole from which no escape is possible is called the event horizon. Supermassive black holes, millions to billions of times the mass of our sun, reside at the centers of most galaxies.", source: "Astrophysics" },
+      { title: "The water cycle", body: "The water cycle describes the continuous movement of water within the Earth and atmosphere. Water evaporates from the surface, rises into the atmosphere where it cools and condenses into clouds, then falls back to the surface as precipitation. It flows through rivers and groundwater systems back to the oceans, where the cycle begins again. This cycle is driven primarily by solar energy and gravity.", source: "Earth Science" },
+      { title: "Blockchain technology", body: "A blockchain is a distributed, immutable ledger that records transactions across a peer-to-peer network. Each block contains a cryptographic hash of the previous block, a timestamp, and transaction data. This structure makes it extremely difficult to alter records retroactively. Originally developed for Bitcoin, blockchain technology now has applications in supply chain management, healthcare records, and decentralized finance.", source: "Computer Science" },
+      { title: "Plate tectonics", body: "Plate tectonics is the scientific theory that Earth's outer shell is divided into several plates that glide over the asthenosphere. These tectonic plates move, collide, and diverge at boundaries, causing earthquakes, volcanic activity, and mountain formation. The theory explains the distribution of continents, ocean basins, and geological features across Earth's surface.", source: "Geology" },
+      { title: "The Roman Empire", body: "The Roman Empire was the post-Republican period of ancient Rome, lasting from 27 BC to 476 AD in the West. At its height under Emperor Trajan, it encompassed approximately 5 million square kilometers and governed 70 million people. Roman contributions to law, governance, engineering, architecture, and language profoundly shaped Western civilization and continue to influence modern society.", source: "History" },
+      { title: "Neural networks", body: "Artificial neural networks are computing systems inspired by biological neural networks in the brain. They consist of layers of interconnected nodes (neurons) that process information using weighted connections. During training, these weights are adjusted through backpropagation to minimize prediction errors. Convolutional neural networks excel at image processing, while recurrent neural networks handle sequential data like text and time series.", source: "Computer Science" },
+      { title: "The periodic table", body: "The periodic table organizes chemical elements by their atomic number, electron configuration, and recurring chemical properties. Dmitri Mendeleev published the first widely recognized periodic table in 1869, correctly predicting the existence and properties of undiscovered elements. The modern table contains 118 confirmed elements, arranged in 18 groups and 7 periods, with elements in the same group sharing similar chemical behavior.", source: "Chemistry" },
+      { title: "Vaccines and immunization", body: "Vaccines work by stimulating the immune system to produce antibodies against specific pathogens without causing the disease. They contain weakened or inactivated forms of microorganisms, their toxins, or surface proteins. Mass vaccination programs have eradicated smallpox, nearly eliminated polio, and dramatically reduced the incidence of measles, diphtheria, and other infectious diseases worldwide.", source: "Medicine" },
+      { title: "Solar energy", body: "Solar energy harnesses radiation from the Sun using photovoltaic cells or concentrated solar power systems. Photovoltaic cells convert sunlight directly into electricity using semiconductor materials, while concentrated systems use mirrors to focus sunlight and generate thermal energy. Solar power capacity has grown exponentially, with costs declining by over 90% since 2010, making it one of the cheapest sources of new electricity generation.", source: "Energy" },
+      { title: "The Amazon rainforest", body: "The Amazon rainforest covers approximately 5.5 million square kilometers across nine South American countries, with 60% in Brazil. It contains roughly 10% of all species on Earth, including 40,000 plant species, 1,300 bird species, and 3,000 types of fish. The rainforest plays a critical role in global climate regulation, absorbing billions of tons of carbon dioxide and producing about 6% of the world's oxygen.", source: "Ecology" },
+      { title: "Cryptography", body: "Cryptography is the practice of securing communication in the presence of adversaries. Modern cryptography relies on mathematical algorithms: symmetric-key encryption uses the same key for encryption and decryption, while public-key cryptography uses paired keys. RSA, elliptic curve cryptography, and AES are widely used standards. Post-quantum cryptography is now being developed to resist attacks from future quantum computers.", source: "Computer Science" },
+      { title: "The human brain", body: "The human brain contains approximately 86 billion neurons connected by trillions of synapses. It weighs about 1.4 kilograms and consumes roughly 20% of the body's energy despite being only 2% of body mass. The cerebral cortex handles higher functions like reasoning and language, the hippocampus manages memory formation, and the cerebellum coordinates movement and balance.", source: "Neuroscience" },
+      { title: "World War II", body: "World War II lasted from 1939 to 1945 and involved most of the world's nations in two opposing alliances: the Allies and the Axis powers. It was the deadliest conflict in human history, resulting in an estimated 70-85 million deaths. The war ended with the unconditional surrender of Germany in May 1945 and Japan in September 1945, following the atomic bombings of Hiroshima and Nagasaki.", source: "History" },
+      { title: "Antibiotics", body: "Antibiotics are medications that destroy or slow the growth of bacteria. Alexander Fleming discovered penicillin in 1928, revolutionizing medicine. Antibiotics work through various mechanisms: disrupting cell wall synthesis, inhibiting protein synthesis, or blocking DNA replication. Antibiotic resistance has become a major global health threat, driven by overuse and misuse, with some bacteria developing resistance to multiple drug classes.", source: "Medicine" },
+      { title: "The Internet", body: "The Internet is a global network of interconnected computer networks that use the TCP/IP protocol suite. It originated from ARPANET in the 1960s and became publicly accessible in the 1990s with the World Wide Web. Today it connects over 5 billion users worldwide, enabling instant communication, information sharing, e-commerce, and streaming media through a vast infrastructure of fiber optic cables, satellites, and data centers.", source: "Technology" },
+      { title: "Evolution by natural selection", body: "Charles Darwin's theory of evolution by natural selection, published in 1859, explains how species change over time. Organisms with traits better suited to their environment are more likely to survive and reproduce, passing those advantageous traits to offspring. Over many generations, this process drives the adaptation of species and the emergence of new ones. Modern evolutionary biology integrates genetics, paleontology, and molecular biology.", source: "Biology" },
+      { title: "Superconductivity", body: "Superconductivity is a quantum mechanical phenomenon where certain materials conduct electrical current with zero resistance below a critical temperature. Discovered in 1911 by Heike Kamerlingh Onnes in mercury at 4.2 Kelvin, it enables powerful electromagnets used in MRI machines, particle accelerators, and maglev trains. The search for room-temperature superconductors remains one of the most active areas in condensed matter physics.", source: "Physics" },
+      { title: "The stock market", body: "Stock markets are organized exchanges where shares of publicly traded companies are bought and sold. They serve as a mechanism for companies to raise capital and for investors to participate in corporate growth. Major indices like the S&P 500, Dow Jones, and NASDAQ track market performance. Modern trading is predominantly electronic, with algorithms executing millions of trades per second based on mathematical models.", source: "Finance" },
+      { title: "Volcanoes", body: "Volcanoes are openings in the Earth's crust through which molten rock, ash, and gases escape from the magma chamber below. They typically form at tectonic plate boundaries or hotspots. The Ring of Fire around the Pacific Ocean contains 75% of the world's active volcanoes. Major eruptions can affect global climate, as the 1815 eruption of Mount Tambora caused the 'Year Without a Summer' in 1816.", source: "Geology" },
+      { title: "Artificial intelligence ethics", body: "AI ethics examines the moral implications of developing and deploying artificial intelligence systems. Key concerns include algorithmic bias, where systems perpetuate or amplify societal prejudices; surveillance and privacy; autonomous weapons; job displacement; and the concentration of power among technology companies. Frameworks like the EU AI Act attempt to regulate AI development while balancing innovation with fundamental rights.", source: "Philosophy" },
+      { title: "The Silk Road", body: "The Silk Road was a network of ancient trade routes connecting East Asia with the Mediterranean, spanning over 6,400 kilometers. Active from the 2nd century BC to the 15th century AD, it facilitated the exchange of silk, spices, precious metals, and ideas between Chinese, Indian, Persian, Arabian, and European civilizations. The routes also transmitted religions, technologies, diseases, and cultural practices across continents.", source: "History" },
+      { title: "Semiconductors", body: "Semiconductors are materials with electrical conductivity between conductors and insulators, most commonly silicon and germanium. By introducing impurities through doping, their electrical properties can be precisely controlled to create transistors, diodes, and integrated circuits. Modern microprocessors contain billions of transistors fabricated at scales below 5 nanometers, enabling the computational power that drives smartphones, computers, and artificial intelligence.", source: "Electronics" },
+      { title: "The human microbiome", body: "The human microbiome consists of trillions of microorganisms living in and on the human body, primarily in the gut. These bacteria, fungi, and viruses outnumber human cells and collectively encode 100 times more genes than the human genome. The gut microbiome influences digestion, immune function, mental health, and metabolic processes. Disruption of the microbiome has been linked to obesity, autoimmune diseases, and depression.", source: "Biology" },
+      { title: "Nuclear fusion", body: "Nuclear fusion is the process of combining light atomic nuclei to form heavier ones, releasing enormous amounts of energy. It powers the Sun and stars through the fusion of hydrogen into helium. Scientists have pursued controlled fusion as a clean, virtually limitless energy source since the 1950s. Projects like ITER in France aim to demonstrate net energy gain from fusion using magnetic confinement in tokamak reactors.", source: "Physics" },
+      { title: "The Industrial Revolution", body: "The Industrial Revolution began in Britain in the late 18th century, transforming economies from agrarian to industrial through mechanization. Key innovations included the steam engine, spinning jenny, and power loom. It led to urbanization, the factory system, and unprecedented economic growth, but also brought environmental pollution, harsh working conditions, and social inequality. The revolution spread to Europe and North America throughout the 19th century.", source: "History" },
+      { title: "Coral bleaching", body: "Coral bleaching occurs when corals expel the symbiotic algae (zooxanthellae) living in their tissues due to environmental stress, primarily elevated water temperatures. Without these algae, corals lose their color and primary food source, becoming vulnerable to disease and death. Mass bleaching events have become more frequent and severe due to climate change, threatening reef ecosystems that support 25% of all marine species.", source: "Marine Biology" },
+      { title: "TCP/IP protocol", body: "The Transmission Control Protocol/Internet Protocol is the fundamental communication protocol suite of the Internet. TCP handles reliable, ordered delivery of data packets between applications, while IP manages addressing and routing of packets across network boundaries. Developed in the 1970s by Vint Cerf and Bob Kahn, TCP/IP's layered architecture and open standards enabled the explosive growth of the global Internet.", source: "Networking" },
+      { title: "Stem cells", body: "Stem cells are undifferentiated cells capable of self-renewal and differentiation into specialized cell types. Embryonic stem cells can become any cell type in the body, while adult stem cells are more limited. Induced pluripotent stem cells (iPSCs), created by reprogramming adult cells, have revolutionized regenerative medicine. Stem cell therapies show promise for treating Parkinson's disease, spinal cord injuries, and heart disease.", source: "Medicine" },
+      { title: "The Ottoman Empire", body: "The Ottoman Empire existed from 1299 to 1922, at its peak controlling much of Southeast Europe, Western Asia, and North Africa. Founded by Osman I, it became a major cultural and political power under Suleiman the Magnificent in the 16th century. The empire was known for its military prowess, administrative sophistication, and architectural achievements. Its dissolution after World War I reshaped the political map of the Middle East and the Balkans.", source: "History" },
+      { title: "Gravitational waves", body: "Gravitational waves are ripples in the fabric of spacetime caused by accelerating massive objects, predicted by Einstein in 1916 and first directly detected by LIGO in 2015. The detection confirmed a major prediction of general relativity and opened a new window for observing the universe. Sources include merging black holes and neutron stars, providing information unavailable through electromagnetic radiation.", source: "Physics" },
+      { title: "Microplastics", body: "Microplastics are plastic fragments smaller than 5 millimeters found throughout the environment, from ocean trenches to mountain peaks. They originate from the breakdown of larger plastics, synthetic textiles, and industrial processes. Studies have found microplastics in drinking water, food, air, and human blood. Their health effects are still being studied, but concerns include inflammation, cellular damage, and the transport of toxic chemicals into organisms.", source: "Environmental Science" },
+      { title: "The Hubble Space Telescope", body: "The Hubble Space Telescope, launched in 1990, orbits Earth at approximately 547 kilometers altitude. Its position above the atmosphere eliminates atmospheric distortion, enabling observations of unprecedented clarity. Hubble has made over 1.5 million observations, determining the rate of expansion of the universe, confirming the existence of supermassive black holes, and capturing images of galaxies formed shortly after the Big Bang.", source: "Astronomy" },
+      { title: "Epigenetics", body: "Epigenetics studies heritable changes in gene expression that do not involve alterations to the underlying DNA sequence. Mechanisms include DNA methylation, histone modification, and non-coding RNA. Environmental factors such as diet, stress, and toxin exposure can trigger epigenetic changes that may be passed to subsequent generations. Epigenetic research has implications for understanding cancer, aging, and developmental disorders.", source: "Genetics" },
+      { title: "Electric vehicles", body: "Electric vehicles use electric motors powered by rechargeable battery packs instead of internal combustion engines. Lithium-ion batteries dominate the market, with energy densities improving roughly 7% annually. Global EV sales exceeded 14 million in 2023, driven by declining battery costs, government incentives, and expanding charging infrastructure. Challenges include battery recycling, raw material sourcing, and grid capacity for mass adoption.", source: "Technology" },
+      { title: "The Cold War", body: "The Cold War was a period of geopolitical tension between the United States and the Soviet Union from 1947 to 1991. While the two superpowers never engaged in direct military conflict, they competed through proxy wars, nuclear arms races, space exploration, and ideological propaganda. Key events include the Berlin Blockade, Cuban Missile Crisis, and the Space Race. The Cold War ended with the dissolution of the Soviet Union in December 1991.", source: "History" },
+      { title: "CERN and the Large Hadron Collider", body: "The Large Hadron Collider at CERN is the world's largest and most powerful particle accelerator, located in a 27-kilometer tunnel beneath the France-Switzerland border. It accelerates protons to nearly the speed of light and collides them to study fundamental particles. The discovery of the Higgs boson in 2012 confirmed the mechanism that gives particles mass, validating a key prediction of the Standard Model of particle physics.", source: "Physics" },
+      { title: "Deforestation", body: "Deforestation is the permanent removal of forest cover for agriculture, logging, or urban development. Approximately 10 million hectares of forest are lost annually, with the tropics most affected. Deforestation contributes roughly 10% of global carbon emissions, destroys biodiversity, disrupts water cycles, and threatens indigenous communities. Efforts to combat it include protected areas, reforestation programs, and supply chain monitoring for commodities like palm oil and soy.", source: "Environmental Science" },
+      { title: "mRNA technology", body: "Messenger RNA technology delivers synthetic mRNA into cells to instruct them to produce specific proteins. The COVID-19 pandemic accelerated its development, with the Pfizer-BioNTech and Moderna vaccines becoming the first mRNA vaccines authorized for human use. The platform offers advantages in speed of development, manufacturing scalability, and flexibility. Researchers are now exploring mRNA therapies for cancer, rare genetic diseases, and other infectious diseases.", source: "Biotechnology" },
+      { title: "The Antarctic ice sheet", body: "The Antarctic ice sheet is the largest single mass of ice on Earth, containing about 26.5 million cubic kilometers of ice — approximately 61% of all fresh water on the planet. If it melted entirely, global sea levels would rise by about 58 meters. Current measurements show accelerating ice loss, particularly in West Antarctica, contributing to rising sea levels. Ice core samples from Antarctica provide climate records spanning 800,000 years.", source: "Climate Science" },
+      { title: "Game theory", body: "Game theory is the mathematical study of strategic decision-making among rational agents. Developed by John von Neumann and John Nash, it analyzes situations where the outcome for each participant depends on the choices of all. Key concepts include Nash equilibrium, the prisoner's dilemma, and zero-sum games. Applications span economics, political science, evolutionary biology, and computer science, particularly in auction design and mechanism design.", source: "Mathematics" },
+      { title: "The microprocessor", body: "The microprocessor integrates the functions of a computer's central processing unit onto a single integrated circuit. Intel's 4004, released in 1971, was the first commercial microprocessor with 2,300 transistors. Modern processors like Apple's M3 Ultra contain 92 billion transistors fabricated at 3-nanometer scale. Moore's Law, predicting transistor density doubling every two years, has guided the semiconductor industry for five decades.", source: "Electronics" },
+      { title: "Alzheimer's disease", body: "Alzheimer's disease is a progressive neurodegenerative disorder and the most common cause of dementia, affecting over 55 million people worldwide. It is characterized by the accumulation of amyloid-beta plaques and tau tangles in the brain, leading to neuronal death and cognitive decline. Risk factors include age, genetics (particularly the APOE4 gene), and cardiovascular health. Recent antibody therapies targeting amyloid plaques have shown modest clinical benefits.", source: "Medicine" },
+      { title: "Renewable energy storage", body: "Energy storage is critical for integrating intermittent renewable sources like solar and wind into power grids. Lithium-ion batteries dominate short-duration storage, while pumped hydro provides 90% of long-duration storage globally. Emerging technologies include solid-state batteries, iron-air batteries, compressed air energy storage, and green hydrogen. Grid-scale storage capacity needs to expand dramatically to support the transition to fully renewable electricity systems.", source: "Energy" },
+      { title: "The Mongol Empire", body: "The Mongol Empire, founded by Genghis Khan in 1206, became the largest contiguous land empire in history, stretching from Korea to Hungary. At its peak, it covered 24 million square kilometers and governed over 100 million people. The Pax Mongolica facilitated unprecedented trade and cultural exchange along the Silk Road. Mongol military tactics, including mounted archery and psychological warfare, were revolutionary for their era.", source: "History" },
+      { title: "HTTPS and TLS", body: "HTTPS secures web communications by encrypting data using Transport Layer Security (TLS), the successor to SSL. TLS uses a handshake protocol combining asymmetric and symmetric encryption: the server presents a digital certificate, client and server negotiate a shared session key, and subsequent data is encrypted symmetrically. HTTPS protects against eavesdropping and tampering, and is now used by over 95% of web traffic.", source: "Cybersecurity" },
+      { title: "The gut-brain axis", body: "The gut-brain axis refers to the bidirectional communication network between the gastrointestinal tract and the central nervous system. The vagus nerve, immune signaling, and microbial metabolites mediate this connection. Gut bacteria produce neurotransmitters including serotonin, dopamine, and GABA, influencing mood, cognition, and behavior. Research suggests that the gut microbiome plays a role in anxiety, depression, autism, and neurodegenerative diseases.", source: "Neuroscience" },
+      { title: "3D printing", body: "3D printing, or additive manufacturing, builds three-dimensional objects layer by layer from digital models. Technologies include fused deposition modeling, stereolithography, and selective laser sintering, using materials ranging from plastics to metals and biocompatible polymers. Applications span rapid prototyping, aerospace components, medical implants, custom prosthetics, and even construction of buildings. The technology is enabling distributed manufacturing and mass customization.", source: "Manufacturing" },
+      { title: "The ozone layer", body: "The ozone layer is a region of Earth's stratosphere containing high concentrations of ozone (O₃) that absorbs 97-99% of the Sun's ultraviolet radiation. The discovery of the ozone hole over Antarctica in 1985 led to the Montreal Protocol of 1987, which phased out chlorofluorocarbons and other ozone-depleting substances. The ozone layer is gradually recovering and is projected to return to 1980 levels by approximately 2066.", source: "Atmospheric Science" },
+      { title: "Containerization and Docker", body: "Containerization packages software with its dependencies into isolated, portable units called containers. Docker, introduced in 2013, popularized containers by providing a standardized format and runtime. Unlike virtual machines, containers share the host OS kernel, making them lightweight and fast to start. Kubernetes orchestrates containers at scale, managing deployment, scaling, and networking for complex microservice architectures.", source: "DevOps" },
+      { title: "Dark matter and dark energy", body: "Dark matter and dark energy constitute approximately 95% of the total mass-energy of the universe but have never been directly observed. Dark matter, making up about 27%, exerts gravitational effects on visible matter, explaining galaxy rotation curves. Dark energy, comprising about 68%, drives the accelerating expansion of the universe. Their nature remains among the greatest unsolved problems in physics.", source: "Cosmology" },
+      { title: "Antibiotic resistance", body: "Antibiotic resistance occurs when bacteria evolve mechanisms to survive exposure to antibiotics. Resistance develops through genetic mutation or horizontal gene transfer and is accelerated by overuse of antibiotics in medicine and agriculture. The WHO identifies antibiotic resistance as one of the greatest threats to global health. Multidrug-resistant organisms like MRSA and extensively drug-resistant tuberculosis cause an estimated 1.27 million deaths annually.", source: "Public Health" },
+      { title: "The Byzantine Empire", body: "The Byzantine Empire, the eastern continuation of the Roman Empire, lasted from 330 AD to 1453 AD with its capital at Constantinople. It preserved Greco-Roman legal, architectural, and literary traditions during the European Middle Ages. The empire's contributions include the Justinian Code of law, the Hagia Sophia basilica, and the preservation of classical texts that later fueled the Western Renaissance. Constantinople fell to the Ottoman Turks in 1453.", source: "History" },
+      { title: "WebAssembly", body: "WebAssembly (Wasm) is a binary instruction format designed as a portable compilation target for high-level languages. It enables near-native performance in web browsers for computationally intensive tasks like gaming, video editing, and scientific simulation. Wasm runs in a sandboxed environment alongside JavaScript and is supported by all major browsers. Beyond the web, WASI extends WebAssembly to server-side and edge computing applications.", source: "Web Technology" },
+      { title: "Neuroplasticity", body: "Neuroplasticity is the brain's ability to reorganize itself by forming new neural connections throughout life. This process enables learning, memory formation, and recovery from brain injuries. Synaptic plasticity strengthens or weakens connections based on activity, while structural plasticity involves the growth of new neurons and synapses. Rehabilitation therapies, mindfulness meditation, and learning new skills all leverage neuroplasticity.", source: "Neuroscience" },
+      { title: "Ocean acidification", body: "Ocean acidification is the ongoing decrease in the pH of Earth's oceans caused by the absorption of atmospheric carbon dioxide. The oceans have absorbed roughly 30% of anthropogenic CO₂ emissions, reducing average surface pH from 8.2 to 8.1 since pre-industrial times — a 26% increase in acidity. This threatens calcifying organisms like corals, shellfish, and plankton, with cascading effects on marine food webs and fisheries.", source: "Marine Science" },
+      { title: "Transformer architecture", body: "The Transformer architecture, introduced in the 2017 paper 'Attention Is All You Need,' revolutionized natural language processing by replacing recurrence with self-attention mechanisms. It processes entire sequences in parallel, enabling efficient training on large datasets. Transformers underpin models like GPT, BERT, and T5, and have extended beyond NLP to computer vision, protein folding, and music generation.", source: "AI Research" },
+      { title: "The space race", body: "The Space Race was a 20th-century competition between the United States and the Soviet Union for spaceflight supremacy. The USSR launched Sputnik, the first artificial satellite, in 1957, and sent Yuri Gagarin as the first human in space in 1961. The US responded with the Apollo program, landing Neil Armstrong and Buzz Aldrin on the Moon on July 20, 1969. The competition accelerated developments in rocketry, telecommunications, and materials science.", source: "History" },
+      { title: "Insulin and diabetes", body: "Insulin is a hormone produced by the beta cells of the pancreas that regulates blood glucose levels. Type 1 diabetes is an autoimmune condition where the immune system destroys insulin-producing cells, requiring lifelong insulin injections. Type 2 diabetes involves insulin resistance, where cells fail to respond effectively to insulin. Globally, over 537 million adults live with diabetes, with prevalence rising due to obesity and sedentary lifestyles.", source: "Medicine" },
+      { title: "Graph databases", body: "Graph databases store data as nodes and edges representing entities and their relationships. Unlike relational databases that use tables and joins, graph databases traverse connections natively, making them efficient for highly connected data. Neo4j, Amazon Neptune, and ArangoDB are popular implementations. Use cases include social networks, fraud detection, recommendation engines, and knowledge graphs where relationship queries dominate.", source: "Database Technology" },
+      { title: "The Cambrian explosion", body: "The Cambrian explosion, approximately 541 million years ago, was a rapid diversification of multicellular animal life over a period of roughly 20 million years. Most major animal phyla appeared during this event, as preserved in fossil deposits like the Burgess Shale. Possible triggers include increased atmospheric oxygen, the evolution of eyes, and an ecological arms race between predators and prey. It remains one of the most significant events in the history of life.", source: "Paleontology" },
+      { title: "5G networks", body: "5G is the fifth generation of mobile network technology, offering peak theoretical speeds of 20 Gbps, latency under 1 millisecond, and support for up to 1 million connected devices per square kilometer. It operates across three frequency bands: low-band for coverage, mid-band for capacity, and millimeter wave for ultra-high speeds. 5G enables applications like autonomous vehicles, remote surgery, industrial IoT, and augmented reality at scale.", source: "Telecommunications" },
+      { title: "The circulatory system", body: "The human circulatory system consists of the heart, blood vessels, and approximately 5 liters of blood. The heart pumps blood through two circuits: pulmonary circulation carries blood to the lungs for gas exchange, while systemic circulation delivers oxygenated blood to tissues. The system transports oxygen, nutrients, hormones, and waste products, while white blood cells and antibodies provide immune defense.", source: "Anatomy" },
+      { title: "Carbon capture and storage", body: "Carbon capture and storage (CCS) involves capturing carbon dioxide emissions from industrial sources, transporting it, and storing it permanently underground in geological formations. Direct air capture (DAC) removes CO₂ directly from the atmosphere. While CCS is considered essential for meeting Paris Agreement targets, current global capacity captures only about 45 million tonnes annually — less than 0.1% of global emissions.", source: "Climate Technology" },
+      { title: "The Meiji Restoration", body: "The Meiji Restoration of 1868 ended over 250 years of Tokugawa shogunate rule and restored imperial rule in Japan under Emperor Meiji. It triggered rapid modernization and industrialization, transforming Japan from a feudal society into a major world power within decades. Reforms included a new constitution, universal education, a modern military, and Western-style infrastructure. Japan's rapid industrialization became a model for other Asian nations.", source: "History" },
+      { title: "CRISPR diagnostics", body: "CRISPR-based diagnostic tools like SHERLOCK and DETECTR use the precision of CRISPR enzymes to detect specific nucleic acid sequences in clinical samples. They can identify viral infections, bacterial pathogens, and genetic mutations with high sensitivity and specificity, often without requiring laboratory equipment. These point-of-care diagnostics were rapidly adapted during the COVID-19 pandemic and show promise for cancer screening and antimicrobial resistance detection.", source: "Diagnostics" },
+      { title: "Deep ocean exploration", body: "The deep ocean below 200 meters remains largely unexplored, with over 80% of the ocean floor unmapped at high resolution. Deep-sea environments include hydrothermal vents, cold seeps, and abyssal plains that host unique ecosystems adapted to extreme pressure, darkness, and cold. Technologies like remotely operated vehicles (ROVs), autonomous underwater vehicles, and deep-sea submersibles continue to reveal new species and geological formations.", source: "Oceanography" },
+      { title: "Supply chain logistics", body: "Modern supply chain management coordinates the flow of goods, information, and finances from raw materials to end consumers. Key components include procurement, manufacturing, warehousing, transportation, and last-mile delivery. Technologies like RFID tracking, predictive analytics, and digital twins optimize efficiency. Global supply chains face challenges including geopolitical disruptions, climate events, labor shortages, and the need for greater sustainability.", source: "Business" },
+      { title: "The Standard Model of physics", body: "The Standard Model describes three of the four fundamental forces of nature — electromagnetic, weak, and strong — and classifies all known elementary particles. It includes six quarks, six leptons, four gauge bosons, and the Higgs boson. While remarkably successful in predicting experimental results, it does not account for gravity, dark matter, dark energy, or the matter-antimatter asymmetry in the universe.", source: "Particle Physics" },
+      { title: "Autonomous vehicles", body: "Autonomous vehicles use sensors including lidar, radar, cameras, and ultrasonic sensors combined with machine learning algorithms to navigate without human input. The SAE defines six levels of automation from Level 0 (no automation) to Level 5 (full autonomy). While companies like Waymo and Cruise operate robotaxi services in limited areas, challenges remain in edge cases, regulatory frameworks, liability, and public acceptance.", source: "Transportation" },
+      { title: "The Harappan civilization", body: "The Indus Valley or Harappan civilization flourished from approximately 3300 to 1300 BC across present-day Pakistan and northwest India. Its major cities, Mohenjo-daro and Harappa, featured sophisticated urban planning with grid-pattern streets, advanced drainage systems, and standardized brick construction. The civilization had a writing system that remains undeciphered, traded with Mesopotamia, and may have had a population of over 5 million at its peak.", source: "Archaeology" },
+      { title: "Quantum entanglement", body: "Quantum entanglement is a phenomenon where two or more particles become correlated such that measuring one instantly determines the state of the other, regardless of the distance between them. Einstein famously called it 'spooky action at a distance.' Entanglement is now a key resource in quantum computing, quantum cryptography, and quantum teleportation. The 2022 Nobel Prize in Physics recognized experimental work proving Bell inequality violations.", source: "Quantum Physics" },
+      { title: "Soil degradation", body: "Soil degradation affects approximately 40% of Earth's land surface, threatening food security for billions of people. Causes include intensive agriculture, deforestation, overgrazing, and urbanization, leading to erosion, nutrient depletion, salinization, and loss of organic matter. Healthy soil contains billions of organisms per gram and provides essential ecosystem services including water filtration, carbon storage, and nutrient cycling. Regenerative agriculture practices aim to restore soil health.", source: "Agriculture" },
+      { title: "Large language models", body: "Large language models (LLMs) are neural networks trained on vast text corpora to predict and generate human-like text. Models like GPT-4, Claude, and Gemini demonstrate emergent capabilities including reasoning, coding, and multilingual translation. Training requires massive computational resources, often using thousands of GPUs over months. Key challenges include hallucination, bias, alignment with human values, and the environmental cost of training and inference.", source: "AI Research" },
+      { title: "The Panama Canal", body: "The Panama Canal is an 82-kilometer waterway connecting the Atlantic and Pacific Oceans through the Isthmus of Panama. Completed in 1914, it uses a system of locks to raise and lower ships 26 meters above sea level through an artificial lake. The canal handles about 5% of world trade, with approximately 14,000 ships passing through annually. The 2016 expansion added a third set of locks, accommodating ships carrying up to 14,000 containers.", source: "Engineering" },
+      { title: "Functional programming", body: "Functional programming is a paradigm that treats computation as the evaluation of mathematical functions, emphasizing immutability and avoiding side effects. Key concepts include pure functions, higher-order functions, pattern matching, and algebraic data types. Languages like Haskell, Erlang, and Clojure are purely functional, while features like lambda expressions, map/filter/reduce, and optional types have been adopted by mainstream languages including JavaScript, Python, and Java.", source: "Computer Science" },
+      { title: "Coral reef ecosystems", body: "Coral reefs occupy less than 0.1% of the ocean floor but support approximately 25% of all marine species. They are built by colonies of tiny coral polyps that secrete calcium carbonate skeletons over thousands of years. Reefs provide coastal protection, support fisheries feeding hundreds of millions of people, and generate billions in tourism revenue. Climate change, pollution, overfishing, and destructive fishing practices threaten reefs worldwide.", source: "Marine Biology" },
+      { title: "The printing press", body: "Johannes Gutenberg's printing press, developed around 1440, revolutionized the production of books in Europe. Using movable metal type, it made printed materials faster and cheaper to produce, replacing hand-copied manuscripts. The technology accelerated the spread of literacy, scientific knowledge, and religious reform. By 1500, an estimated 20 million volumes had been printed. Historians consider it one of the most important inventions in human history.", source: "History" },
+      { title: "Gene therapy", body: "Gene therapy introduces, alters, or replaces genetic material within a patient's cells to treat or prevent disease. Approaches include replacing a mutated gene with a healthy copy, inactivating a malfunctioning gene, or introducing a new gene. FDA-approved therapies include Luxturna for inherited retinal dystrophy and Zolgensma for spinal muscular atrophy. Challenges include delivery mechanisms, immune responses, off-target effects, and the high cost of treatment.", source: "Medicine" },
+      { title: "Permafrost thawing", body: "Permafrost covers approximately 25% of the Northern Hemisphere's land surface and contains an estimated 1,500 gigatons of organic carbon — twice the amount currently in the atmosphere. As global temperatures rise, permafrost thaw releases methane and carbon dioxide, creating a positive feedback loop that accelerates warming. Thawing also destabilizes infrastructure, causes ground subsidence, and releases ancient pathogens. Arctic permafrost temperatures have increased by 2-3°C since the 1970s.", source: "Climate Science" },
+      { title: "The Rosetta Stone", body: "The Rosetta Stone is a granodiorite stele inscribed with a decree issued in 196 BC during the reign of Ptolemy V. The text appears in three scripts: ancient Egyptian hieroglyphics, Demotic script, and ancient Greek. Discovered in 1799 by French soldiers in Egypt, it provided the key to deciphering Egyptian hieroglyphics. Jean-François Champollion used the stone to decode the hieroglyphic script in 1822, unlocking millennia of Egyptian history.", source: "Archaeology" },
+      { title: "Edge computing", body: "Edge computing processes data near its source rather than in centralized cloud data centers. This reduces latency, conserves bandwidth, and enables real-time decision-making for applications like autonomous driving, industrial automation, and augmented reality. Edge infrastructure ranges from on-device processing to micro data centers. The global edge computing market is growing rapidly as IoT deployments expand and 5G networks provide the necessary connectivity.", source: "Cloud Computing" },
+      { title: "Circadian rhythms", body: "Circadian rhythms are approximately 24-hour biological cycles driven by internal molecular clocks synchronized to environmental light-dark cycles. The suprachiasmatic nucleus in the hypothalamus serves as the master clock in mammals. These rhythms regulate sleep-wake cycles, hormone release, body temperature, and metabolism. Disruption of circadian rhythms through shift work, jet lag, or excessive artificial light exposure is associated with increased risks of obesity, diabetes, cardiovascular disease, and cancer.", source: "Chronobiology" },
+      { title: "Earthquake engineering", body: "Earthquake engineering designs structures to withstand seismic forces through base isolation, energy dissipation systems, and ductile construction. Base isolators decouple buildings from ground motion, while dampers absorb seismic energy. Building codes require structures in seismic zones to survive expected earthquakes without collapse. Japan's engineering innovations, developed after devastating earthquakes, have made modern Japanese buildings among the most earthquake-resistant in the world.", source: "Civil Engineering" },
+      { title: "The Turing Test", body: "The Turing Test, proposed by Alan Turing in 1950, evaluates a machine's ability to exhibit intelligent behavior indistinguishable from a human. In the test, a human evaluator converses with both a human and a machine without knowing which is which. If the evaluator cannot reliably distinguish them, the machine is said to have passed. While widely discussed, the test has been criticized for testing mimicry rather than genuine understanding or consciousness.", source: "Computer Science" },
+      { title: "Biodiversity loss", body: "Global biodiversity is declining at an unprecedented rate, with approximately 1 million species threatened with extinction. The current extinction rate is estimated at 100 to 1,000 times the natural background rate. Primary drivers include habitat destruction, overexploitation, climate change, pollution, and invasive species. The Kunming-Montreal Global Biodiversity Framework aims to protect 30% of land and sea areas by 2030 and halt human-driven extinctions.", source: "Conservation" },
+      { title: "Fermentation", body: "Fermentation is a metabolic process in which organisms convert carbohydrates into acids, gases, or alcohol in the absence of oxygen. It is fundamental to food production: yeast fermentation produces bread and alcoholic beverages, lactic acid fermentation creates yogurt, cheese, and kimchi, and acetic acid fermentation yields vinegar. Industrial fermentation also produces antibiotics, biofuels, and enzymes. The process has been used by humans for at least 7,000 years.", source: "Biochemistry" },
     ];
 
     const searchInput = document.getElementById('search');
@@ -390,7 +438,6 @@
     let corpusEmbeddings = null;
     let debounceTimer = null;
 
-    // Cosine similarity
     function cosineSim(a, b) {
       let dot = 0;
       for (let i = 0; i < a.length; i++) dot += a[i] * b[i];
@@ -400,7 +447,7 @@
     async function init() {
       try {
         statusDot.className = 'status-dot loading';
-        statusText.textContent = 'Loading model (~30 MB, one-time)...';
+        statusText.textContent = 'loading model (~30 MB, one-time)';
         progressBar.classList.add('active');
 
         const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.0/+esm');
@@ -411,29 +458,30 @@
           progress_callback: (event) => {
             if (event.status === 'progress' && typeof event.progress === 'number') {
               progressFill.style.width = `${Math.round(event.progress)}%`;
-              statusText.textContent = `Downloading model... ${Math.round(event.progress)}%`;
+              statusText.textContent = `downloading model ${Math.round(event.progress)}%`;
             }
           },
         });
 
-        // Pre-embed the corpus
-        statusText.textContent = 'Indexing documents...';
+        statusText.textContent = 'indexing 100 articles...';
         corpusEmbeddings = [];
 
-        for (let i = 0; i < faq.length; i++) {
-          const output = await extractor(faq[i], { pooling: 'mean', normalize: true });
+        for (let i = 0; i < corpus.length; i++) {
+          const text = corpus[i].title + '. ' + corpus[i].body;
+          const output = await extractor(text, { pooling: 'mean', normalize: true });
           corpusEmbeddings.push(output.tolist()[0]);
-          progressFill.style.width = `${Math.round(((i + 1) / faq.length) * 100)}%`;
-          statusText.textContent = `Indexing ${i + 1}/${faq.length} documents...`;
+          const pct = Math.round(((i + 1) / corpus.length) * 100);
+          progressFill.style.width = `${pct}%`;
+          statusText.textContent = `indexing ${i + 1}/${corpus.length} articles`;
         }
 
         statusDot.className = 'status-dot ready';
-        statusText.textContent = `Ready — ${faq.length} documents indexed`;
+        statusText.textContent = `ready · ${corpus.length} articles · arctic-embed-s q8`;
         progressBar.classList.remove('active');
         searchInput.focus();
       } catch (err) {
         statusDot.className = 'status-dot';
-        statusText.textContent = `Error: ${err.message}`;
+        statusText.textContent = `error: ${err.message}`;
         progressBar.classList.remove('active');
         console.error(err);
       }
@@ -444,7 +492,7 @@
       const query = e.target.value.trim();
 
       if (!query) {
-        resultsDiv.innerHTML = '<div class="empty">Type to search by meaning, not just keywords</div>';
+        resultsDiv.innerHTML = '';
         return;
       }
 
@@ -456,25 +504,28 @@
 
         const scored = corpusEmbeddings
           .map((emb, i) => ({ index: i, score: cosineSim(queryVec, emb) }))
-          .filter(r => r.score >= 0.15)
+          .filter(r => r.score >= 0.1)
           .sort((a, b) => b.score - a.score)
-          .slice(0, 5);
+          .slice(0, 8);
 
         if (scored.length === 0) {
-          resultsDiv.innerHTML = '<div class="empty">No matches found</div>';
+          resultsDiv.innerHTML = '<div class="empty">No matches</div>';
           return;
         }
 
-        resultsDiv.innerHTML = scored.map((r, i) => `
-          <div class="result-card" style="animation-delay: ${i * 50}ms">
-            <div class="result-header">
-              <span class="result-index">#${r.index + 1}</span>
-              <span class="result-score">${(r.score * 100).toFixed(0)}%</span>
-            </div>
-            <div class="result-text">${escapeHtml(faq[r.index])}</div>
-          </div>
-        `).join('');
-      }, 150);
+        resultsDiv.innerHTML = '<div class="results">' + scored.map((r, i) => {
+          const item = corpus[r.index];
+          return `
+            <div class="result-card" style="animation-delay: ${i * 30}ms">
+              <div class="result-header">
+                <div class="result-title">${escapeHtml(item.title)}</div>
+                <div class="result-score">${(r.score * 100).toFixed(0)}%</div>
+              </div>
+              <div class="result-body">${escapeHtml(item.body)}</div>
+              <div class="result-source">${escapeHtml(item.source)}</div>
+            </div>`;
+        }).join('') + '</div>';
+      }, 120);
     });
 
     function escapeHtml(str) {
@@ -483,7 +534,6 @@
       return el.innerHTML;
     }
 
-    resultsDiv.innerHTML = '<div class="empty">Type to search by meaning, not just keywords</div>';
     init();
   </script>
 
@@ -494,7 +544,7 @@
         if (existing) existing.remove();
         const span = document.createElement('span');
         span.className = 'copied';
-        span.textContent = 'Copied!';
+        span.textContent = 'copied';
         el.appendChild(span);
         setTimeout(() => span.remove(), 2000);
       });
