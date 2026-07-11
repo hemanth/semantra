@@ -293,11 +293,11 @@
       text-transform: lowercase;
     }
 
-    .arch-img {
+    .arch-svg {
       width: 100%;
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      filter: invert(1);
+      background: #0a0a0a;
     }
   </style>
 </head>
@@ -332,8 +332,178 @@
     <div id="results"></div>
 
     <div class="arch-section">
-      <div class="arch-label">Architecture</div>
-      <img src="./architecture.jpg" alt="semantra architecture diagram" class="arch-img">
+      <div class="arch-label">architecture</div>
+      <svg class="arch-svg" viewBox="0 0 680 520" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 3.5 L 0 7 z" fill="#555"/>
+          </marker>
+          <marker id="arrow-light" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 3.5 L 0 7 z" fill="#333"/>
+          </marker>
+        </defs>
+
+        <style>
+          text { font-family: 'Inter', system-ui, sans-serif; }
+          .t-label { font-size: 10px; fill: #555; }
+          .t-title { font-size: 11.5px; fill: #ccc; font-weight: 500; }
+          .t-sub { font-size: 9px; fill: #555; }
+          .t-mono { font-family: 'JetBrains Mono', 'SF Mono', monospace; font-size: 9.5px; fill: #666; }
+          .t-section { font-size: 9px; fill: #444; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 500; }
+          .t-ext { font-size: 10px; fill: #888; font-weight: 500; }
+          .t-data { font-size: 8.5px; fill: #444; font-family: 'JetBrains Mono', monospace; }
+          .box { fill: none; stroke: #2a2a2a; stroke-width: 1; rx: 6; }
+          .box-filled { fill: #111; stroke: #2a2a2a; stroke-width: 1; rx: 6; }
+          .box-dashed { fill: none; stroke: #222; stroke-width: 1; stroke-dasharray: 4 3; rx: 8; }
+          .line { stroke: #333; stroke-width: 1; fill: none; }
+          .line-data { stroke: #444; stroke-width: 1; fill: none; stroke-dasharray: 3 2; }
+        </style>
+
+        <!-- ═══ THREAD BOUNDARIES ═══ -->
+        <!-- Main Thread -->
+        <rect x="20" y="16" width="394" height="488" class="box-dashed"/>
+        <text x="34" y="36" class="t-section">Main Thread</text>
+
+        <!-- Worker Thread -->
+        <rect x="434" y="16" width="226" height="310" class="box-dashed"/>
+        <text x="448" y="36" class="t-section">Web Worker</text>
+
+        <!-- ═══ USER CODE ═══ -->
+        <rect x="44" y="52" width="346" height="62" class="box-filled"/>
+        <text x="62" y="74" class="t-title">Application Code</text>
+        <text x="62" y="92" class="t-mono">search('query', corpus)  →  [{ text, score, index }]</text>
+
+        <!-- Arrow: User → Public API -->
+        <line x1="217" y1="114" x2="217" y2="136" class="line" marker-end="url(#arrow)"/>
+
+        <!-- ═══ PUBLIC API ═══ -->
+        <rect x="44" y="138" width="346" height="52" class="box-filled"/>
+        <text x="62" y="159" class="t-title">index.ts</text>
+        <text x="120" y="159" class="t-sub">Public API</text>
+        <text x="62" y="175" class="t-mono">search()  similarity()  embed()  Semvec</text>
+
+        <!-- Arrow: API → Pipeline -->
+        <line x1="217" y1="190" x2="217" y2="210" class="line" marker-end="url(#arrow)"/>
+        <text x="224" y="204" class="t-data">WeakMap cache check</text>
+
+        <!-- ═══ PIPELINE ═══ -->
+        <rect x="44" y="212" width="346" height="52" class="box-filled"/>
+        <text x="62" y="233" class="t-title">semvec.ts</text>
+        <text x="130" y="233" class="t-sub">Pipeline Orchestrator</text>
+        <text x="62" y="249" class="t-mono">init queue · corpus mgmt · add/remove</text>
+
+        <!-- Arrow: Pipeline → Chunker (down-left) -->
+        <line x1="130" y1="264" x2="130" y2="290" class="line" marker-end="url(#arrow)"/>
+
+        <!-- Arrow: Pipeline → Engine (down-right) -->
+        <line x1="300" y1="264" x2="300" y2="290" class="line" marker-end="url(#arrow)"/>
+        <text x="307" y="281" class="t-data">texts[]</text>
+
+        <!-- ═══ CHUNKER ═══ -->
+        <rect x="44" y="292" width="160" height="48" class="box-filled"/>
+        <text x="62" y="312" class="t-title">chunker.ts</text>
+        <text x="133" y="312" class="t-sub">Auto</text>
+        <text x="62" y="327" class="t-mono">≤256 tok: pass · &gt;256: split</text>
+
+        <!-- ═══ ENGINE ═══ -->
+        <rect x="224" y="292" width="166" height="48" class="box-filled"/>
+        <text x="242" y="312" class="t-title">engine.ts</text>
+        <text x="310" y="312" class="t-sub">Inference</text>
+        <text x="242" y="327" class="t-mono">lazy singleton · q8 dtype</text>
+
+        <!-- Arrow: Engine → Worker (horizontal) -->
+        <line x1="390" y1="316" x2="452" y2="316" class="line" marker-end="url(#arrow)"/>
+        <text x="396" y="308" class="t-data">postMessage</text>
+
+        <!-- ═══ WORKER INTERNALS ═══ -->
+        <rect x="454" y="52" width="186" height="72" class="box-filled"/>
+        <text x="472" y="73" class="t-title">@huggingface/transformers</text>
+        <text x="472" y="89" class="t-mono">ONNX Runtime · Tokenizer</text>
+        <text x="472" y="103" class="t-mono">WebGPU ↔ WASM fallback</text>
+
+        <!-- Model box -->
+        <rect x="454" y="140" width="186" height="44" class="box-filled"/>
+        <text x="472" y="160" class="t-title">Arctic-Embed-S</text>
+        <text x="472" y="174" class="t-mono">33M params · 384-dim · 30 MB</text>
+
+        <!-- Arrow: transformers → model -->
+        <line x1="547" y1="124" x2="547" y2="138" class="line" marker-end="url(#arrow)"/>
+
+        <!-- Worker RPC box -->
+        <rect x="454" y="200" width="186" height="44" class="box-filled"/>
+        <text x="472" y="220" class="t-title">worker.ts</text>
+        <text x="530" y="220" class="t-sub">RPC</text>
+        <text x="472" y="234" class="t-mono">Blob URL · Transferable</text>
+
+        <!-- Arrow: worker → transformers -->
+        <line x1="547" y1="200" x2="547" y2="126" class="line" marker-end="url(#arrow)"/>
+
+        <!-- Embed result arrow back -->
+        <line x1="454" y1="262" x2="454" y2="280" class="line-data"/>
+        <line x1="454" y1="280" x2="400" y2="280" class="line"/>
+        <line x1="400" y1="280" x2="400" y2="316" class="line"/>
+        <line x1="400" y1="316" x2="392" y2="316" class="line" marker-end="url(#arrow-light)"/>
+        <text x="458" y="276" class="t-data">Float32Array</text>
+
+        <!-- Arrow: worker RPC → worker (connection) -->
+        <line x1="547" y1="244" x2="547" y2="262" class="line" marker-end="url(#arrow)"/>
+
+        <!-- Model cache label -->
+        <rect x="454" y="260" width="186" height="56" class="box-filled"/>
+        <text x="472" y="280" class="t-title">Browser Cache API</text>
+        <text x="472" y="294" class="t-mono">Model binary cached</text>
+        <text x="472" y="308" class="t-mono">after first download</text>
+
+        <!-- ═══ MATH ═══ -->
+        <rect x="44" y="358" width="160" height="48" class="box-filled"/>
+        <text x="62" y="378" class="t-title">math.ts</text>
+        <text x="107" y="378" class="t-sub">Scoring</text>
+        <text x="62" y="393" class="t-mono">cosineSim · topK · L2norm</text>
+
+        <!-- Arrow: Engine result → Math -->
+        <line x1="300" y1="340" x2="300" y2="368" class="line-data"/>
+        <line x1="300" y1="368" x2="206" y2="368" class="line" marker-end="url(#arrow)"/>
+        <text x="220" y="362" class="t-data">embeddings[]</text>
+
+        <!-- ═══ STORE ═══ -->
+        <rect x="224" y="358" width="166" height="48" class="box-filled"/>
+        <text x="242" y="378" class="t-title">store.ts</text>
+        <text x="290" y="378" class="t-sub">Persistence</text>
+        <text x="242" y="393" class="t-mono">namespace + model scoped</text>
+
+        <!-- Arrow: Store → IndexedDB -->
+        <rect x="224" y="424" width="166" height="40" class="box-filled"/>
+        <text x="242" y="443" class="t-title">IndexedDB</text>
+        <text x="310" y="443" class="t-sub">or in-memory</text>
+        <text x="242" y="456" class="t-mono">content-hash keyed</text>
+        <line x1="307" y1="406" x2="307" y2="422" class="line" marker-end="url(#arrow)"/>
+
+        <!-- ═══ ERRORS ═══ -->
+        <rect x="44" y="424" width="160" height="40" class="box-filled"/>
+        <text x="62" y="443" class="t-title">errors.ts</text>
+        <text x="118" y="443" class="t-sub">SemvecError</text>
+        <text x="62" y="456" class="t-mono">MODEL_OFFLINE · FETCH_FAILED</text>
+
+        <!-- ═══ INGEST ═══ -->
+        <rect x="434" y="358" width="226" height="48" class="box-filled"/>
+        <text x="452" y="378" class="t-ext">ingest.ts</text>
+        <text x="508" y="378" class="t-sub">Semvec.fromURL()</text>
+        <text x="452" y="393" class="t-mono">JSON · Markdown · text · auto-detect</text>
+
+        <!-- Arrow: Pipeline → Ingest -->
+        <line x1="390" y1="238" x2="420" y2="238" class="line-data"/>
+        <line x1="420" y1="238" x2="420" y2="382" class="line-data"/>
+        <line x1="420" y1="382" x2="432" y2="382" class="line" marker-end="url(#arrow)"/>
+
+        <!-- ═══ DATA FLOW ANNOTATIONS ═══ -->
+        <text x="44" y="492" class="t-data">Data flow: query → chunk → embed (worker) → cosine rank → results</text>
+
+        <!-- Legend -->
+        <line x1="400" y1="488" x2="430" y2="488" style="stroke:#333;stroke-width:1"/>
+        <text x="434" y="492" class="t-data">sync</text>
+        <line x1="480" y1="488" x2="510" y2="488" style="stroke:#444;stroke-width:1;stroke-dasharray:3 2"/>
+        <text x="514" y="492" class="t-data">async / data</text>
+      </svg>
     </div>
 
     <div class="footer">
