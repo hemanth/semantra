@@ -1,6 +1,6 @@
 {
   "name": "semantra",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Semantic vector search, entirely in the browser",
   "type": "module",
   "main": "dist/index.js",
@@ -36,7 +36,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@huggingface/transformers": "^3.4.0"
+    "@huggingface/transformers": "^4.3.0"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",
